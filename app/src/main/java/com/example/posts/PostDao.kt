@@ -3,7 +3,7 @@ package com.example.posts
 import androidx.room.*
 
 @Dao
-public interface PostDao {
+interface PostDao {
     @Query("SELECT * FROM post")
     fun getAll() : List<Post>
 

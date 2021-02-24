@@ -3,7 +3,7 @@ package com.example.posts
 import retrofit2.Call
 import retrofit2.http.*
 
-public interface PostsService {
+interface PostsService {
     @GET("posts")
     fun get() : Call<List<Post>>
 
@@ -11,5 +11,6 @@ public interface PostsService {
     fun delete(@Path("id") id : Long): Call<Unit>
 
     @POST("posts")
+    @Headers("Content-type:application/json;charset=UTF-8 ")
     fun post(@Body post : CreatedPost) : Call<Post>
 }
