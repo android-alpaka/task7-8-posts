@@ -4,4 +4,8 @@
     <string name="textitem">textItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItem</string>
     <string name="titleitem">TitleItemTitleItemTitleItemTitleItemTitleItemTitleItem</string>
     <string name="title">%1$s : %2$s</string>
+    <string name="refresh">REFRESH</string>
+    <string name="send">SEND</string>
+    <string name="body">body</string>
+    <string name="title_hint">Title</string>
 </resources>
