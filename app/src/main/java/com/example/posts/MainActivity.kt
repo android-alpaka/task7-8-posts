@@ -63,8 +63,8 @@ class MainActivity : AppCompatActivity() {
             Post(
                 binder!!.nextId(),
                 2032001,
-                titleItem.text as String,
-                editTextTitle.text.toString()
+                editTextTitle.text.toString(),
+                textInputEditText.text.toString()
         ))
     }
 
