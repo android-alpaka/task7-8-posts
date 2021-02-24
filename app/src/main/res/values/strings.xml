@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Posts</string>
+    <string name="delete">DELETE</string>
+    <string name="textitem">textItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItemtextItem</string>
+    <string name="titleitem">TitleItemTitleItemTitleItemTitleItemTitleItemTitleItem</string>
+    <string name="title">%1$s : %2$s</string>
+</resources>
