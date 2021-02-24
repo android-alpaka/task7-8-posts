@@ -1,6 +1,5 @@
 package com.example.posts
 
-import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 class PostAdapter(
     private val items : MutableList<Post>,
     private val onClick: (Post) -> Unit
-) : RecyclerView.Adapter<PostAdapter.UserViewHolder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        val holder = UserViewHolder(
+) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
+        val holder = PostViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
         )
         holder.root.findViewById<ImageButton>(R.id.motionItem).setOnClickListener {
@@ -23,14 +22,14 @@ class PostAdapter(
         return holder
     }
 
-    override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         holder.bind(items[position])
 
     }
 
     override fun getItemCount() = items.size
 
-    inner class UserViewHolder(val root: View) : RecyclerView.ViewHolder(root) {
+    inner class PostViewHolder(val root: View) : RecyclerView.ViewHolder(root) {
         val titleItem = root.findViewById<TextView>(R.id.titleItem)
         val textItem = root.findViewById<TextView>(R.id.textItem)
         val buttonItem = root.findViewById<ImageButton>(R.id.button)
