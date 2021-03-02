@@ -23,7 +23,7 @@ class MyService : Service() {
         it.deleted = true
         DoWhateverAsync { MyApp.postDao.update(it) }
         MyApp.service.delete(it.id)
-            //.enqueue(MyCallback(this) { Log.e("LocalService", "Post deleted !") })
+            .enqueue(MyCallback(this) { Log.i("MyService", "Post deleted !") })
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -38,7 +38,9 @@ class MyService : Service() {
             adapter.notifyItemChanged(adapter.items.size - 1)
             recyclerView?.scrollToPosition(adapter.items.size - 1)
 
-            MyApp.service.post(CreatedPost(post.userId, post.title, post.body))
+            MyApp.service.post(CreatedPost(post.userId, post.title, post.body)).enqueue(MyCallback(this@MyService) {
+                Log.i("MyService", "Post ${post.id} posted")
+            })
         }
 
         fun toEnd() {
