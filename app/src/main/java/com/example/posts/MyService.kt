@@ -1,6 +1,5 @@
 package com.example.posts
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
@@ -12,21 +11,19 @@ import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Error
+import java.lang.ref.WeakReference
 
 class MyService : Service() {
 
-    private var fail: MainActivity.Failure? = null
+    private var msg: MainActivity.Message? = null
     private var recyclerView: RecyclerView? = null
-    private var progressBar: ProgressBar?   = null
+    private var progressBar: ProgressBar? = null
 
     val adapter = PostAdapter(mutableListOf()) {
         it.deleted = true
-
         DoWhateverAsync { MyApp.postDao.update(it) }
-
-
-        MyApp.service.delete(it.id).enqueue(MyCallback { Log.e("LocalService", "Post deleted !") })
+        MyApp.service.delete(it.id)
+            //.enqueue(MyCallback(this) { Log.e("LocalService", "Post deleted !") })
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -35,25 +32,29 @@ class MyService : Service() {
 
     inner class MyBinder : Binder() {
         fun add(post: Post) {
-            DoWhateverAsync { MyApp.postDao.update(post) }
+            DoWhateverAsync { MyApp.postDao.insert(post) }
 
             adapter.items.add(post)
-            adapter.notifyItemChanged(adapter.items.size -1)
-            recyclerView?.scrollToPosition(adapter.items.size-1)
+            adapter.notifyItemChanged(adapter.items.size - 1)
+            recyclerView?.scrollToPosition(adapter.items.size - 1)
 
-            MyApp.service.post(CreatedPost(post.userId,post.title,post.body))
+            MyApp.service.post(CreatedPost(post.userId, post.title, post.body))
         }
 
-        fun nextId() : Long = (adapter.items.size +1).toLong()
+        fun toEnd() {
+            recyclerView?.scrollToPosition(adapter.items.size - 1)
+        }
+
+        fun nextId(): Long = (adapter.items.size + 1).toLong()
 
         fun reset() {
-            fail = null
+            msg = null
             progressBar = null
             recyclerView = null
         }
 
         fun refresh() {
-            MyApp.service.get().enqueue(MyCallback {
+            MyApp.service.get().enqueue(MyCallback(this@MyService) {
                 val posts = it.body()!!
                 DoWhateverAsync {
                     MyApp.postDao.deleteAll()
@@ -67,46 +68,48 @@ class MyService : Service() {
             })
         }
 
-        fun init(recView: RecyclerView, bar: ProgressBar, f: MainActivity.Failure) {
-            fail = f
+        fun init(recView: RecyclerView, bar: ProgressBar, m: MainActivity.Message) {
+            msg = m
             progressBar = bar
             recyclerView = recView
             recyclerView!!.adapter = adapter
         }
 
         fun takeAllPosts() {
-            if(adapter.items.isEmpty()) TakeAllPostAsync().execute()
+            if (adapter.items.isEmpty()) TakeAllPostAsync(this@MyService).execute()
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private inner class TakeAllPostAsync() : AsyncTask<Unit, Unit, List<Post>>() {
+    class TakeAllPostAsync(s: MyService) : AsyncTask<Unit, Unit, List<Post>>() {
+        private val serviceRef = WeakReference(s)
 
         override fun doInBackground(vararg params: Unit?): List<Post> {
             return MyApp.postDao.getAll()
         }
 
         override fun onPostExecute(result: List<Post>) {
-            if(result.isNotEmpty()) {
-                progressBar?.visibility ?: ProgressBar.INVISIBLE
-                adapter.items.addAll(result)
-                adapter.notifyDataSetChanged()
-            } else {
-                MyApp.service.get().enqueue(MyCallback<List<Post>>() {
-                    Log.e("LocalService", "Get all posts !")
-                    val posts = it.body()!!
-                    adapter.items.addAll(posts)
-                    adapter.notifyDataSetChanged()
-                    progressBar?.visibility = ProgressBar.INVISIBLE
-                    DoWhateverAsync {
-                        MyApp.postDao.insertAll(posts)
-                    }
-                })
-
+            val service = serviceRef.get()
+            if (service != null) {
+                if (result.isNotEmpty()) {
+                    service.progressBar?.visibility ?: ProgressBar.GONE
+                    service.adapter.items.addAll(result)
+                    service.adapter.notifyDataSetChanged()
+                } else {
+                    MyApp.service.get().enqueue(
+                        MyCallback<List<Post>>(service) {
+                            //Log.e("LocalService", "Get all posts !")
+                            val posts = it.body()!!
+                            service.adapter.items.addAll(posts)
+                            service.adapter.notifyDataSetChanged()
+                            service.progressBar?.visibility = ProgressBar.GONE
+                            DoWhateverAsync {
+                                MyApp.postDao.insertAll(posts)
+                            }
+                        }
+                    )
+                }
             }
-            super.onPostExecute(result)
         }
-
     }
 
     private class DoWhateverAsync(private val handler: () -> Unit) : AsyncTask<Unit, Unit, Unit>() {
@@ -119,21 +122,19 @@ class MyService : Service() {
         }
     }
 
+    class MyCallback<T>(s: MyService, private val handler: (response: Response<T>) -> Unit, ) : Callback<T> {
+        private val serviceRef = WeakReference(s)
 
-    inner class MyCallback<T>(
-        private val handler: (response: Response<T>) -> Unit
-    ) :
-        Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
+            val service = serviceRef.get()
             if (response.isSuccessful) {
                 if (response.body() != null) {
                     handler(response)
                 } else {
                     Log.e("LocalService", "Response.body() == null")
                 }
-            } else {
-                fail?.showFailure(response.toString())
             }
+            service?.msg?.showMessage(response.toString())
         }
 
         override fun onFailure(call: Call<T>, t: Throwable) {

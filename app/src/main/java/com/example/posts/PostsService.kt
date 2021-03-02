@@ -11,6 +11,6 @@ interface PostsService {
     fun delete(@Path("id") id : Long): Call<Unit>
 
     @POST("posts")
-    @Headers("Content-type:application/json;charset=UTF-8 ")
+    //@Headers("Content-type:application/json;charset=UTF-8 ")
     fun post(@Body post : CreatedPost) : Call<Post>
 }
