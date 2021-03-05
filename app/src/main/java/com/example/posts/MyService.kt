@@ -38,9 +38,10 @@ class MyService : Service() {
             adapter.notifyItemChanged(adapter.items.size - 1)
             recyclerView?.scrollToPosition(adapter.items.size - 1)
 
-            MyApp.service.post(CreatedPost(post.userId, post.title, post.body)).enqueue(MyCallback(this@MyService) {
-                Log.i("MyService", "Post ${post.id} posted")
-            })
+            MyApp.service.post(CreatedPost(post.userId, post.title, post.body))
+                .enqueue(MyCallback(this@MyService) {
+                    Log.i("MyService", "Post ${post.id} posted")
+                })
         }
 
         fun toEnd() {
@@ -124,7 +125,8 @@ class MyService : Service() {
         }
     }
 
-    class MyCallback<T>(s: MyService, private val handler: (response: Response<T>) -> Unit, ) : Callback<T> {
+    class MyCallback<T>(s: MyService, private val handler: (response: Response<T>) -> Unit) :
+        Callback<T> {
         private val serviceRef = WeakReference(s)
 
         override fun onResponse(call: Call<T>, response: Response<T>) {

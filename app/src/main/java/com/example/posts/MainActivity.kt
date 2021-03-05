@@ -44,10 +44,7 @@ class MainActivity : AppCompatActivity() {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
+        //--------------------
         bindService(
             Intent(this,
                 MyService::class.java,
@@ -75,11 +72,12 @@ class MainActivity : AppCompatActivity() {
         binder?.toEnd()
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         binder?.reset()
         unbindService(conn)
-        super.onStop()
+        super.onDestroy()
     }
+
 
     inner class Message{
         fun showMessage(text: String) {
